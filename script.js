@@ -45,13 +45,24 @@ let cornellBoxParams = {
     'cylinderColour': 0x00ff00,
     'sphereColour': 0x0000ff,
 
-    'pointLightIntensity': 1,
+    'pointLightIntensity': 0,
     'pointLightColour': 0xffffff,
+    'pointLightDistance': 0,
+    'pointLightDecay': 1,
+    'pointLightPower': 1,
+
     'directionalLightIntensity': 1,
     'directionalLightColour': 0xffffff,
+
     'spotLightIntensity': 1,
     'spotLightColour': 0xffffff,
-    'ambientLightIntensity': 1,
+    'spotLightDistance': 0,
+    'spotLightDecay': 1,
+    'spotLightPower': 1,
+    'spotLightAngle': 1,
+    'spotLightPenumbra': 0,
+
+    'ambientLightIntensity': 0,
     'ambientLightColour': 0xffffff,
 }
 
@@ -70,10 +81,21 @@ let cornellBoxParamsMappingMaterials = {
 let cornellBoxParamsMappingLights = {
     'pointLightIntensity': pointLight,
     'pointLightColour': pointLight,
+    'pointLightDistance': pointLight,
+    'pointLightDecay': pointLight,
+    'pointLightPower': pointLight,
+
     'directionalLightIntensity': directionalLight,
     'directionalLightColour': directionalLight,
+
     'spotLightIntensity': spotLight,
     'spotLightColour': spotLight,
+    'spotLightDistance': spotLight,
+    'spotLightDecay': spotLight,
+    'spotLightPower': spotLight,
+    'spotLightAngle': spotLight,
+    'spotLightPenumbra': spotLight,
+
     'ambientLightIntensity': ambientLight,
     'ambientLightColour': ambientLight,
 }
@@ -97,11 +119,14 @@ for (const key in cornellBoxParams) {
                 });
         }
     }
-    materialGUI.addColor(cornellBoxParams, key)
-        .onChange(value => {
-            cornellBoxParamsMappingMaterials[key].color.set(value);
-            // cornellBoxParams[key].needsUpdate = true;
-        });
+    else {
+        materialGUI.addColor(cornellBoxParams, key)
+            .onChange(value => {
+                cornellBoxParamsMappingMaterials[key].color.set(value);
+                // cornellBoxParams[key].needsUpdate = true;
+            });
+    }
+
 }
 
 
@@ -270,8 +295,13 @@ function createRoomMeshes() {
 function createLights(meshToAddTo, lightPos) {
 
     pointLight.color.set(cornellBoxParams.pointLightColor);
-    pointLight.intensity = cornellBoxParams.pointLightIntensity;
     pointLight.position.set(0, lightPos, 0);
+
+    pointLight.intensity = cornellBoxParams.pointLightIntensity;
+    pointLight.distance = cornellBoxParams.pointLightDistance;
+    pointLight.decay = cornellBoxParams.pointLightDecay;
+    pointLight.power = cornellBoxParams.pointLightPower;
+
     meshToAddTo.add(pointLight);
 
 
@@ -283,6 +313,12 @@ function createLights(meshToAddTo, lightPos) {
 
     spotLight.color.set(cornellBoxParams.spotLightColor);
     spotLight.intensity = cornellBoxParams.spotLightIntensity;
+    spotLight.distance = cornellBoxParams.spotLightDistance;
+    spotLight.decay = cornellBoxParams.spotLightDecay;
+    spotLight.power = cornellBoxParams.spotLightPower;
+    spotLight.angle = cornellBoxParams.spotLightAngle;
+    spotLight.penumbra = cornellBoxParams.spotLightPenumbra;
+
     spotLight.position.set(0, lightPos, 0);
     // spotLight.target.position.set(0, 0, 0);
     meshToAddTo.add(spotLight);
