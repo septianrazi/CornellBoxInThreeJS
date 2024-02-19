@@ -32,7 +32,29 @@ let directionalLight = new THREE.DirectionalLight();
 let spotLight = new THREE.SpotLight();
 let ambientLight = new THREE.AmbientLight();
 
+let textureLoader = new THREE.TextureLoader();
+let brickTexture = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_Color.jpg')
+let brickTextureNormals = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_NormalGL.jpg')
+let brickTextureDisplacement = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_Displacement.jpg')
+let brickTextureRoughness = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_Roughness.jpg')
+let brickTextureAmbientOcclusion = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_AmbientOcclusion.jpg')
 
+let metalTexture = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Color.jpg')
+let metalTextureNormals = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_NormalGL.jpg')
+let metalTextureDisplacement = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Displacement.jpg')
+let metalTextureRoughness = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Roughness.jpg')
+let metalTextureAmbientOcclusion = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_AmbientOcclusion.jpg')
+
+let fabricTexture = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Color.jpg')
+let fabricTextureNormals = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_NormalGL.jpg')
+let fabricTextureDisplacement = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Displacement.jpg')
+let fabricTextureRoughness = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Roughness.jpg')
+
+let texturesColor = [brickTexture, metalTexture, fabricTexture]
+let texturesNormals = [brickTextureNormals, metalTextureNormals, fabricTextureNormals]
+let texturesDisplacement = [brickTextureDisplacement, metalTextureDisplacement, fabricTextureDisplacement]
+let texturesRoughness = [brickTextureRoughness, metalTextureRoughness, fabricTextureRoughness]
+let texturesAmbientOcclusion = [brickTextureAmbientOcclusion, metalTextureAmbientOcclusion]
 
 let cornellBoxParams = {
     'leftWallColour': 0x00ff00,
@@ -41,20 +63,21 @@ let cornellBoxParams = {
     'stageColour': 0x222222,
     'floorColour': 0xffffff,
     'ceilingColour': 0xffffff,
+
     'coneColour': 0xffff00,
     'cylinderColour': 0x00ff00,
     'sphereColour': 0x0000ff,
 
-    'pointLightIntensity': 0,
+    'pointLightIntensity': 20,
     'pointLightColour': 0xffffff,
     'pointLightDistance': 0,
     'pointLightDecay': 1,
     'pointLightPower': 1,
 
-    'directionalLightIntensity': 1,
+    'directionalLightIntensity': 0,
     'directionalLightColour': 0xffffff,
 
-    'spotLightIntensity': 1,
+    'spotLightIntensity': 0,
     'spotLightColour': 0xffffff,
     'spotLightDistance': 0,
     'spotLightDecay': 1,
@@ -62,7 +85,7 @@ let cornellBoxParams = {
     'spotLightAngle': 1,
     'spotLightPenumbra': 0,
 
-    'ambientLightIntensity': 0,
+    'ambientLightIntensity': 1,
     'ambientLightColour': 0xffffff,
 }
 
@@ -75,7 +98,7 @@ let cornellBoxParamsMappingMaterials = {
     'ceilingColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColour }),
     'coneColour': new THREE.MeshLambertMaterial({ color: cornellBoxParams.coneColour }),
     'cylinderColour': new THREE.MeshPhongMaterial({ color: cornellBoxParams.cylinderColour }),
-    'sphereColour': new THREE.MeshPhysicalMaterial({ color: cornellBoxParams.sphereColour }),
+    'sphereColour': new THREE.MeshPhysicalMaterial({ 'color': cornellBoxParams.sphereColour }),
 }
 
 let cornellBoxParamsMappingLights = {
@@ -126,6 +149,87 @@ for (const key in cornellBoxParams) {
                 // cornellBoxParams[key].needsUpdate = true;
             });
     }
+
+}
+
+
+let colorTypeParameters = ['blendColor', 'color', 'emissive']
+let objectMaterialProperties = {
+    'transparent': false,
+    'opacity': 1.0,
+    'depthTest': true,
+    'depthWrite': true,
+    'alphaTest': 0.0,
+    'alphaHash': false,
+    'alphaToCoverage': false,
+    'visible': true,
+    'side': THREE.FrontSide,
+}
+
+const materialPropertiesGUI = gui.addFolder('Material Properties')
+for (const key in objectMaterialProperties) {
+    let paramValue = objectMaterialProperties[key];
+    if ((key.includes('side'))) {
+        materialPropertiesGUI.add(objectMaterialProperties, key, { FrontSide: THREE.FrontSide, BackSide: THREE.BackSide, DoubleSide: THREE.DoubleSide })
+            .onChange(value => {
+                console.log("Side")
+            });
+    } else if (typeof paramValue === 'boolean') {
+        materialPropertiesGUI.add(objectMaterialProperties, key).onChange(value => {
+            console.log("Boolean")
+        });
+    } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
+        materialPropertiesGUI.addColor(objectMaterialProperties, key).onChange(value => {
+            console.log("Color")
+        });
+    } else if (typeof paramValue === 'number') {
+        materialPropertiesGUI.add(objectMaterialProperties, key, 0, 1).onChange(value => {
+            console.log("Float")
+        });
+    }
+}
+
+let lambertMaterialProperties = {
+    'color': 0xffffff,
+    'emissive': 0x000000,
+    'wireframe': false,
+    'vertexColors': false,
+    'fog': true,
+    'envMaps': texturesColor[0],
+    'map': texturesColor[0],
+    'alphaMap': texturesColor[0],
+    'combine': THREE.MultiplyOperation,
+    'reflectivity': 1,
+    'refractionRatio': 0.98,
+}
+
+const lambertMaterialPropertiesGUI = gui.addFolder('Lambert Material Properties')
+for (const key in objectMaterialProperties) {
+    let paramValue = objectMaterialProperties[key];
+    if ((key.includes('combine'))) {
+        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key, { FrontSide: THREE.FrontSide, BackSide: THREE.BackSide, DoubleSide: THREE.DoubleSide })
+            .onChange(value => {
+                console.log("Combine")
+            });
+    } else if (typeof paramValue === 'boolean') {
+        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key).onChange(value => {
+            console.log("Boolean")
+        });
+    } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
+        lambertMaterialPropertiesGUI.addColor(objectMaterialProperties, key).onChange(value => {
+            console.log("Color")
+        });
+    } else if (typeof paramValue === 'number') {
+        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key, 0, 1).onChange(value => {
+            console.log("Float")
+        });
+    }
+}
+let phongMaterialProperties = {
+
+}
+
+let physicalMaterialProperties = {
 
 }
 
@@ -294,24 +398,22 @@ function createRoomMeshes() {
 
 function createLights(meshToAddTo, lightPos) {
 
-    pointLight.color.set(cornellBoxParams.pointLightColor);
+    pointLight.color.set(cornellBoxParams.pointLightColour);
     pointLight.position.set(0, lightPos, 0);
-
+    pointLight.power = cornellBoxParams.pointLightPower;
     pointLight.intensity = cornellBoxParams.pointLightIntensity;
     pointLight.distance = cornellBoxParams.pointLightDistance;
     pointLight.decay = cornellBoxParams.pointLightDecay;
-    pointLight.power = cornellBoxParams.pointLightPower;
-
     meshToAddTo.add(pointLight);
 
 
-    directionalLight.color.set(cornellBoxParams.directionalLightColor);
+    directionalLight.color.set(cornellBoxParams.directionalLightColour);
     directionalLight.intensity = cornellBoxParams.directionalLightIntensity;
     directionalLight.position.set(0, lightPos, 0);
     directionalLight.target.position.set(0, 0, 0);
     meshToAddTo.add(directionalLight);
 
-    spotLight.color.set(cornellBoxParams.spotLightColor);
+    spotLight.color.set(cornellBoxParams.spotLightColour);
     spotLight.intensity = cornellBoxParams.spotLightIntensity;
     spotLight.distance = cornellBoxParams.spotLightDistance;
     spotLight.decay = cornellBoxParams.spotLightDecay;
@@ -323,8 +425,10 @@ function createLights(meshToAddTo, lightPos) {
     // spotLight.target.position.set(0, 0, 0);
     meshToAddTo.add(spotLight);
 
-    ambientLight.color.set(cornellBoxParams.ambientLightColor);
+    ambientLight.color.set(cornellBoxParams.ambientLightColour);
     ambientLight.intensity = cornellBoxParams.ambientLightIntensity;
+    console.log(cornellBoxParams.ambientLightIntensity)
+    console.log(ambientLight.intensity)
     ambientLight.position.set(0, lightPos, 0);
     meshToAddTo.add(ambientLight);
 
