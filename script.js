@@ -50,39 +50,11 @@ let fabricTextureNormals = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG
 let fabricTextureDisplacement = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Displacement.jpg')
 let fabricTextureRoughness = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Roughness.jpg')
 
-let texturesColor = {
-    'none': null,
-    'bricks': brickTexture,
-    'metal': metalTexture,
-    'fabric': fabricTexture,
-}
-
-let texturesNormals = {
-    'none': null,
-    'bricks': brickTextureNormals,
-    'metal': metalTextureNormals,
-    'fabric': fabricTextureNormals,
-}
-
-let texturesDisplacement = {
-    'none': null,
-    'bricks': brickTextureDisplacement,
-    'metal': metalTextureDisplacement,
-    'fabric': fabricTextureDisplacement,
-}
-
-let texturesRoughness = {
-    'none': null,
-    'bricks': brickTextureRoughness,
-    'metal': metalTextureRoughness,
-    'fabric': fabricTextureRoughness,
-}
-
-let texturesAmbientOcclusion = {
-    'none': null,
-    'bricks': brickTextureAmbientOcclusion,
-    'metal': metalTextureAmbientOcclusion,
-}
+let texturesColor = [brickTexture, metalTexture, fabricTexture]
+let texturesNormals = [brickTextureNormals, metalTextureNormals, fabricTextureNormals]
+let texturesDisplacement = [brickTextureDisplacement, metalTextureDisplacement, fabricTextureDisplacement]
+let texturesRoughness = [brickTextureRoughness, metalTextureRoughness, fabricTextureRoughness]
+let texturesAmbientOcclusion = [brickTextureAmbientOcclusion, metalTextureAmbientOcclusion]
 
 let lambertMaterial = new THREE.MeshLambertMaterial();
 let phongMaterial = new THREE.MeshPhongMaterial();
@@ -246,7 +218,6 @@ let lambertMaterialProperties = {
     'refractionRatio': 0.98,
 }
 
-// console.log(texturesColor[0])
 console.log({ ...objectMaterialProperties, ...lambertMaterialProperties })
 lambertMaterial = new THREE.MeshLambertMaterial(lambertMaterialProperties);
 
@@ -256,22 +227,19 @@ for (const key in lambertMaterialProperties) {
 
     //special cases
     if (key == 'envMaps') {
-        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, texturesColor).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
             cone.needsUpdate = true;
         });
     } else if (key == 'map') {
-        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, texturesColor).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
             cone.needsUpdate = true;
         });
     } else if (key == 'alphaMap') {
-        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, texturesColor).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
             cone.needsUpdate = true;
