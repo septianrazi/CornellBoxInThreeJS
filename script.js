@@ -50,11 +50,45 @@ let fabricTextureNormals = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG
 let fabricTextureDisplacement = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Displacement.jpg')
 let fabricTextureRoughness = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Roughness.jpg')
 
-let texturesColor = [brickTexture, metalTexture, fabricTexture]
-let texturesNormals = [brickTextureNormals, metalTextureNormals, fabricTextureNormals]
-let texturesDisplacement = [brickTextureDisplacement, metalTextureDisplacement, fabricTextureDisplacement]
-let texturesRoughness = [brickTextureRoughness, metalTextureRoughness, fabricTextureRoughness]
-let texturesAmbientOcclusion = [brickTextureAmbientOcclusion, metalTextureAmbientOcclusion]
+let texturesColor = {
+    'none': null,
+    'bricks': brickTexture,
+    'metal': metalTexture,
+    'fabric': fabricTexture,
+}
+
+let texturesNormals = {
+    'none': null,
+    'bricks': brickTextureNormals,
+    'metal': metalTextureNormals,
+    'fabric': fabricTextureNormals,
+}
+
+let texturesDisplacement = {
+    'none': null,
+    'bricks': brickTextureDisplacement,
+    'metal': metalTextureDisplacement,
+    'fabric': fabricTextureDisplacement,
+}
+
+let texturesRoughness = {
+    'none': null,
+    'bricks': brickTextureRoughness,
+    'metal': metalTextureRoughness,
+    'fabric': fabricTextureRoughness,
+}
+
+let texturesAmbientOcclusion = {
+    'none': null,
+    'bricks': brickTextureAmbientOcclusion,
+    'metal': metalTextureAmbientOcclusion,
+}
+
+let lambertMaterial = new THREE.MeshLambertMaterial();
+let phongMaterial = new THREE.MeshPhongMaterial();
+let physicalMaterial = new THREE.MeshPhysicalMaterial();
+
+let cone, cylinder, sphere;
 
 let cornellBoxParams = {
     'leftWallColour': 0x00ff00,
@@ -123,9 +157,6 @@ let cornellBoxParamsMappingLights = {
     'ambientLightColour': ambientLight,
 }
 
-createRoomMeshes();
-createObjects();
-
 const materialGUI = gui.addFolder('Materials');
 const lightingGUI = gui.addFolder('Lighting');
 for (const key in cornellBoxParams) {
@@ -172,19 +203,31 @@ for (const key in objectMaterialProperties) {
     if ((key.includes('side'))) {
         materialPropertiesGUI.add(objectMaterialProperties, key, { FrontSide: THREE.FrontSide, BackSide: THREE.BackSide, DoubleSide: THREE.DoubleSide })
             .onChange(value => {
-                console.log("Side")
+                objectMaterialProperties[key] = value
+                lambertMaterial[key] = value
+                phongMaterial[key] = value
+                physicalMaterial[key] = value
             });
     } else if (typeof paramValue === 'boolean') {
         materialPropertiesGUI.add(objectMaterialProperties, key).onChange(value => {
-            console.log("Boolean")
+            objectMaterialProperties[key] = value
+            lambertMaterial[key] = value
+            phongMaterial[key] = value
+            physicalMaterial[key] = value
         });
     } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
         materialPropertiesGUI.addColor(objectMaterialProperties, key).onChange(value => {
-            console.log("Color")
+            objectMaterialProperties[key] = value
+            lambertMaterial[key].set(value)
+            phongMaterial[key].set(value)
+            physicalMaterial[key].set(value)
         });
     } else if (typeof paramValue === 'number') {
         materialPropertiesGUI.add(objectMaterialProperties, key, 0, 1).onChange(value => {
-            console.log("Float")
+            objectMaterialProperties[key] = value
+            lambertMaterial[key] = value
+            phongMaterial[key] = value
+            physicalMaterial[key] = value
         });
     }
 }
@@ -194,7 +237,7 @@ let lambertMaterialProperties = {
     'emissive': 0x000000,
     'wireframe': false,
     'vertexColors': false,
-    'fog': true,
+    'fog': false,
     'envMaps': texturesColor[0],
     'map': texturesColor[0],
     'alphaMap': texturesColor[0],
@@ -203,28 +246,68 @@ let lambertMaterialProperties = {
     'refractionRatio': 0.98,
 }
 
+// console.log(texturesColor[0])
+console.log({ ...objectMaterialProperties, ...lambertMaterialProperties })
+lambertMaterial = new THREE.MeshLambertMaterial(lambertMaterialProperties);
+
 const lambertMaterialPropertiesGUI = gui.addFolder('Lambert Material Properties')
-for (const key in objectMaterialProperties) {
-    let paramValue = objectMaterialProperties[key];
-    if ((key.includes('combine'))) {
-        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key, { FrontSide: THREE.FrontSide, BackSide: THREE.BackSide, DoubleSide: THREE.DoubleSide })
+for (const key in lambertMaterialProperties) {
+    let paramValue = lambertMaterialProperties[key];
+
+    //special cases
+    if (key == 'envMaps') {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            cone.needsUpdate = true;
+        });
+    } else if (key == 'map') {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            cone.needsUpdate = true;
+        });
+    } else if (key == 'alphaMap') {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            cone.needsUpdate = true;
+        });
+    } else if ((key.includes('combine'))) {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, { MultiplyOperation: THREE.MultiplyOperation, MixOperation: THREE.MixOperation, AddOperation: THREE.AddOperation })
             .onChange(value => {
-                console.log("Combine")
+                lambertMaterialProperties[key] = value;
+                lambertMaterial[key] = value;
+                cone.needsUpdate = true;
             });
+
+        // generic cases
     } else if (typeof paramValue === 'boolean') {
-        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key).onChange(value => {
-            console.log("Boolean")
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key).onChange(value => {
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            cone.needsUpdate = true;
+
         });
     } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
-        lambertMaterialPropertiesGUI.addColor(objectMaterialProperties, key).onChange(value => {
-            console.log("Color")
+        lambertMaterialPropertiesGUI.addColor(lambertMaterialProperties, key).onChange(value => {
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key].set(value);
+            cone.needsUpdate = true;
         });
     } else if (typeof paramValue === 'number') {
-        lambertMaterialPropertiesGUI.add(objectMaterialProperties, key, 0, 1).onChange(value => {
-            console.log("Float")
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, 0, 1).onChange(value => {
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            cone.needsUpdate = true;
         });
     }
 }
+
+
 let phongMaterialProperties = {
 
 }
@@ -234,6 +317,8 @@ let physicalMaterialProperties = {
 }
 
 
+createRoomMeshes();
+createObjects();
 
 // Animation loop
 function animate() {
@@ -482,17 +567,18 @@ function createTable() {
 
 function createObjects() {
     let coneGeo = new THREE.ConeGeometry(1, 2, 20);
-    let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColour']);
+    // let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColour']);
+    cone = new THREE.Mesh(coneGeo, lambertMaterial);
     cone.position.set(-1, 0, -1);
     scene.add(cone);
 
     let cylinderGeo = new THREE.CylinderGeometry(1, 1, 2, 20);
-    let cylinder = new THREE.Mesh(cylinderGeo, cornellBoxParamsMappingMaterials['cylinderColour']);
+    cylinder = new THREE.Mesh(cylinderGeo, phongMaterial);
     cylinder.position.set(1, 0, -1);
     scene.add(cylinder);
 
     let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
-    let sphere = new THREE.Mesh(sphereGeo, cornellBoxParamsMappingMaterials['sphereColour']);
+    sphere = new THREE.Mesh(sphereGeo, physicalMaterial);
     sphere.position.set(0, 0, 2);
     scene.add(sphere);
 }
