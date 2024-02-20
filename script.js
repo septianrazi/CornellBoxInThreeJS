@@ -8,7 +8,6 @@ import { HTMLMesh } from 'three/addons/interactive/HTMLMesh.js';
 import { InteractiveGroup } from 'three/addons/interactive/InteractiveGroup.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
-
 // Create a scene
 let scene = new THREE.Scene();
 
@@ -16,7 +15,6 @@ let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 15;
 // THREE.RectAreaLightUniformsLib.init();
-
 
 // Create a renderer
 const canvas = document.querySelector('#c');
@@ -27,7 +25,7 @@ document.body.appendChild(renderer.domElement);
 // Enable Shadows
 renderer.shadowMap.enabled = true;
 
-// Enable VR
+// Enable VR (from example code https://github.dev/mrdoob/three.js/blob/master/examples/webxr_vr_sandbox.html)
 document.body.appendChild(VRButton.createButton(renderer));
 renderer.xr.enabled = true;
 const controller1 = renderer.xr.getController(0);
@@ -200,7 +198,7 @@ let room;
 let objectMeshes;
 let globalMesh;
 
-// guis
+// GUIS
 const lightingGUI = gui.addFolder('Lighting');
 lightingGUI.close();
 let pointLightParams = {
@@ -660,7 +658,7 @@ let telelumenWallProperties = {
 {
     // telelumen wall GUI
     const telelumenWallPropertiesGUI = gui.addFolder('Telelumen Wall Properties')
-    telelumenWallPropertiesGUI.close();
+    // telelumenWallPropertiesGUI.close();
     for (const key in telelumenWallProperties) {
         if (key.includes('Color')) {
             telelumenWallPropertiesGUI.addColor(telelumenWallProperties, key)
@@ -1084,3 +1082,10 @@ function animate() {
 // Start the animation loop
 renderer.setAnimationLoop(animate);
 // animate();
+
+
+// -------------------------------------
+// Septian Razi
+// 3D Computer Graphics Practical Work 2
+// 20/02/2024
+// -------------------------------------
