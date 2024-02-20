@@ -4,6 +4,10 @@ import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { HTMLMesh } from 'three/addons/interactive/HTMLMesh.js';
+import { InteractiveGroup } from 'three/addons/interactive/InteractiveGroup.js';
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+
 
 // Create a scene
 let scene = new THREE.Scene();
@@ -26,6 +30,27 @@ renderer.shadowMap.enabled = true;
 // Enable VR
 document.body.appendChild(VRButton.createButton(renderer));
 renderer.xr.enabled = true;
+const controller1 = renderer.xr.getController(0);
+
+const geometry = new THREE.BufferGeometry();
+geometry.setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, - 5)]);
+
+controller1.add(new THREE.Line(geometry));
+scene.add(controller1);
+
+const controller2 = renderer.xr.getController(1);
+controller2.add(new THREE.Line(geometry));
+scene.add(controller2);
+
+const controllerModelFactory = new XRControllerModelFactory();
+
+const controllerGrip1 = renderer.xr.getControllerGrip(0);
+controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
+scene.add(controllerGrip1);
+
+const controllerGrip2 = renderer.xr.getControllerGrip(1);
+controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
+scene.add(controllerGrip2);
 
 // Add fly controls
 const controls = new FlyControls(camera, renderer.domElement);
@@ -153,7 +178,11 @@ let backWallMaterial = new THREE.MeshStandardMaterial();
 let backWallRectLight = new THREE.RectAreaLight();
 
 
+// define meshes
 let cone, cylinder, sphere;
+let room;
+let objectMeshes;
+let globalMesh;
 
 // guis
 const lightingGUI = gui.addFolder('Lighting');
@@ -579,7 +608,6 @@ for (const key in physicalMaterialProperties) {
     }
 }
 
-
 let telelumenWallProperties = {
     'rightWallColor': 0x00ff00,
     'rightWallLightIntensity': 1,
@@ -624,6 +652,7 @@ let telelumenWallProperties = {
         }
     }
 }
+
 
 let shadowProperties = {
     'shadowMapEnabled': true,
@@ -684,7 +713,6 @@ let cornellBoxParams = {
     'floorColor': 0xffffff,
     'ceilingColor': 0xffffff,
 }
-
 const materialGUI = gui.addFolder('Misc Materials');
 let cornellBoxParamsMappingMaterials = {
     'stageColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColor }),
@@ -701,6 +729,17 @@ for (const key in cornellBoxParams) {
 
 }
 
+// VR GUI Stuff
+const group = new InteractiveGroup(renderer, camera);
+scene.add(group);
+
+const mesh = new HTMLMesh(gui.domElement);
+mesh.position.x = - 0.75;
+mesh.position.y = 1.5;
+mesh.position.z = - 0.5;
+mesh.rotation.y = Math.PI / 4;
+mesh.scale.setScalar(2);
+group.add(mesh);
 
 
 createRoomMeshes();
@@ -724,7 +763,7 @@ function createRoomMeshes() {
     let roomHeight = 13
 
     let cage = new THREE.Object3D();
-    let room = new THREE.Object3D();
+    room = new THREE.Object3D();
 
     // Create Pillars using BoxGeometry
     let pillarGeometry = new THREE.BoxGeometry(0.5, roomHeight, 0.5);
@@ -965,21 +1004,26 @@ function createTable() {
 
 
 function createObjects() {
+    let objectYPos = -1
+    objectMeshes = new THREE.Object3D();
     let coneGeo = new THREE.ConeGeometry(1, 2, 20);
     // let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColor']);
     cone = new THREE.Mesh(coneGeo, lambertMaterial);
-    cone.position.set(-1.5, 0, -1);
-    scene.add(cone);
+    cone.position.set(-1.5, objectYPos, -1);
+    objectMeshes.add(cone);
+    // scene.add(cone);
 
     let cylinderGeo = new THREE.CylinderGeometry(1, 1, 2, 20);
     cylinder = new THREE.Mesh(cylinderGeo, phongMaterial);
-    cylinder.position.set(1.5, 0, -1);
-    scene.add(cylinder);
+    cylinder.position.set(1.5, objectYPos, -1);
+    objectMeshes.add(cylinder);
+    // scene.add(cylinder);
 
     let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
     sphere = new THREE.Mesh(sphereGeo, physicalMaterial);
-    sphere.position.set(0, 0, 1);
-    scene.add(sphere);
+    sphere.position.set(0, objectYPos, 1);
+    objectMeshes.add(sphere);
+    // scene.add(sphere);
 
     cone.receiveShadow = true;
     cone.castShadow = true;
@@ -987,7 +1031,16 @@ function createObjects() {
     cylinder.castShadow = true;
     sphere.receiveShadow = true;
     sphere.castShadow = true;
+
+    room.add(objectMeshes)
+    return objectMeshes
 }
+
+room.scale.set(0.5, 0.5, 0.5);
+room.position.z = -5;
+globalMesh = new THREE.Object3D();
+// globalMesh.add(room);
+// globalMesh.add(objectMeshes);
 
 // let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
 // let sphere2 = new THREE.Mesh(sphereGeo, new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
