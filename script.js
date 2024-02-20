@@ -156,81 +156,95 @@ let backWallRectLight = new THREE.RectAreaLight();
 let cone, cylinder, sphere;
 
 // guis
-let cornellBoxParams = {
-    'stageColor': 0x222222,
-    'floorColor': 0xffffff,
-    'ceilingColor': 0xffffff,
-
-    'pointLightIntensity': 5,
-    'pointLightColor': 0xffffff,
-    'pointLightDistance': 0,
-    'pointLightDecay': 1,
-    'pointLightPower': 1,
-
-    'directionalLightIntensity': 0,
-    'directionalLightColor': 0xffffff,
-
-    'spotLightIntensity': 0,
-    'spotLightColor': 0xffffff,
-    'spotLightDistance': 0,
-    'spotLightDecay': 1,
-    'spotLightPower': 0,
-    'spotLightAngle': 1,
-    'spotLightPenumbra': 0,
-
-    'ambientLightIntensity': 0.5,
-    'ambientLightColor': 0xffffff,
-}
-
-let cornellBoxParamsMappingMaterials = {
-    'stageColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColor }),
-    'floorColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColor }),
-    'ceilingColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColor }),
-}
-
-let cornellBoxParamsMappingLights = {
-    'pointLightIntensity': pointLight,
-    'pointLightColor': pointLight,
-    'pointLightDistance': pointLight,
-    'pointLightDecay': pointLight,
-    'pointLightPower': pointLight,
-
-    'directionalLightIntensity': directionalLight,
-    'directionalLightColor': directionalLight,
-
-    'spotLightIntensity': spotLight,
-    'spotLightColor': spotLight,
-    'spotLightDistance': spotLight,
-    'spotLightDecay': spotLight,
-    'spotLightPower': spotLight,
-    'spotLightAngle': spotLight,
-    'spotLightPenumbra': spotLight,
-
-    'ambientLightIntensity': ambientLight,
-    'ambientLightColor': ambientLight,
-}
-
-const materialGUI = gui.addFolder('Materials');
 const lightingGUI = gui.addFolder('Lighting');
-for (const key in cornellBoxParams) {
-    if (key.includes('Light')) {
-        if (key.includes('Color')) {
-            lightingGUI.addColor(cornellBoxParams, key)
-                .onChange(value => {
-                    cornellBoxParamsMappingLights[key].color.set(value);
-                });
-        } else {
-            lightingGUI.add(cornellBoxParams, key, 0, 100)
-                .onChange(value => {
-                    cornellBoxParamsMappingLights[key].intensity = value;
-                });
-        }
-    }
-    else {
-        materialGUI.addColor(cornellBoxParams, key)
+let pointLightParams = {
+    'intensity': 5,
+    'color': 0xffffff,
+    'distance': 0,
+    'decay': 1,
+    'power': 1,
+}
+const pointLightGUI = lightingGUI.addFolder('Point Light');
+for (const key in pointLightParams) {
+    if (key.includes('color')) {
+        pointLightGUI.addColor(pointLightParams, key)
             .onChange(value => {
-                cornellBoxParamsMappingMaterials[key].color.set(value);
-                // cornellBoxParams[key].needsUpdate = true;
+                pointLight.color.set(value);
+                pointLight.needsUpdate = true;
+            });
+    } else {
+        pointLightGUI.add(pointLightParams, key, 0, 100)
+            .onChange(value => {
+                pointLight[key] = value;
+                pointLight.needsUpdate = true;
+            });
+    }
+}
+
+let directionalLightParams = {
+    'intensity': 0,
+    'color': 0xffffff,
+}
+const directionalLightGUI = lightingGUI.addFolder('Directional Light');
+for (const key in directionalLightParams) {
+    if (key.includes('color')) {
+        directionalLightGUI.addColor(directionalLightParams, key)
+            .onChange(value => {
+                directionalLight.color.set(value);
+                directionalLight.needsUpdate = true;
+            });
+    } else {
+        directionalLightGUI.add(directionalLightParams, key, 0, 100)
+            .onChange(value => {
+                directionalLight[key] = value;
+                directionalLight.needsUpdate = true;
+            });
+    }
+}
+
+let spotLightParams = {
+    'intensity': 0,
+    'color': 0xffffff,
+    'distance': 0,
+    'decay': 1,
+    'power': 0,
+    'angle': 1,
+    'penumbra': 0,
+}
+const spotLightGUI = lightingGUI.addFolder('Spot Light');
+for (const key in spotLightParams) {
+    if (key.includes('color')) {
+        spotLightGUI.addColor(spotLightParams, key)
+            .onChange(value => {
+                spotLight.color.set(value);
+                spotLight.needsUpdate = true;
+            });
+    } else {
+        spotLightGUI.add(spotLightParams, key, 0, 100)
+            .onChange(value => {
+                spotLight[key] = value;
+                spotLight.needsUpdate = true;
+            });
+    }
+}
+
+let ambientLightParams = {
+    'intensity': 0.5,
+    'color': 0xffffff,
+}
+const ambientLightGUI = lightingGUI.addFolder('Ambient Light');
+for (const key in ambientLightParams) {
+    if (key.includes('color')) {
+        ambientLightGUI.addColor(ambientLightParams, key)
+            .onChange(value => {
+                ambientLight.color.set(value);
+                ambientLight.needsUpdate = true;
+            });
+    } else {
+        ambientLightGUI.add(ambientLightParams, key, 0, 100)
+            .onChange(value => {
+                ambientLight[key] = value;
+                ambientLight.needsUpdate = true;
             });
     }
 }
@@ -248,7 +262,6 @@ let objectMaterialProperties = {
     'visible': true,
     'side': THREE.FrontSide,
 }
-
 const materialPropertiesGUI = gui.addFolder('Object Material Properties')
 for (const key in objectMaterialProperties) {
     let paramValue = objectMaterialProperties[key];
@@ -298,7 +311,6 @@ let lambertMaterialProperties = {
     'reflectivity': 1,
     'refractionRatio': 0.98,
 }
-
 lambertMaterial = new THREE.MeshLambertMaterial({ ...objectMaterialProperties, ...lambertMaterialProperties });
 const lambertMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Cone Lambert Material Properties')
 for (const key in lambertMaterialProperties) {
@@ -382,7 +394,6 @@ let phongMaterialProperties = {
     'reflectivity': 1,
     'refractionRatio': 0.98,
 }
-
 phongMaterial = new THREE.MeshPhongMaterial({ ...objectMaterialProperties, ...phongMaterialProperties });
 const phongMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Cylinder Phong Material Properties')
 for (const key in phongMaterialProperties) {
@@ -482,7 +493,6 @@ let physicalMaterialProperties = {
     // 'irisdesenceMap': texturesColor['none'],
     'alphaMap': texturesOpacity['none'],
 }
-
 physicalMaterial = new THREE.MeshPhysicalMaterial({ ...objectMaterialProperties, ...physicalMaterialProperties });
 const physicalMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Sphere Physical Material Properties')
 for (const key in physicalMaterialProperties) {
@@ -578,38 +588,40 @@ let telelumenWallProperties = {
     'backWallColor': 0xffffff,
     'backWallLightIntensity': 1,
 }
+{
+    // telelumen wall GUI
+    const telelumenWallPropertiesGUI = gui.addFolder('Telelumen Wall Properties')
+    for (const key in telelumenWallProperties) {
+        if (key.includes('Color')) {
+            telelumenWallPropertiesGUI.addColor(telelumenWallProperties, key)
+                .onChange(value => {
+                    if (key.includes('right')) {
+                        rightWallMaterial.color.set(value);
+                        rightWallRectLight.color.set(value);
+                        rightWallMaterial.needsUpdate = true
 
-const telelumenWallPropertiesGUI = gui.addFolder('Telelumen Wall Properties')
-for (const key in telelumenWallProperties) {
-    if (key.includes('Color')) {
-        telelumenWallPropertiesGUI.addColor(telelumenWallProperties, key)
-            .onChange(value => {
-                if (key.includes('right')) {
-                    rightWallMaterial.color.set(value);
-                    rightWallRectLight.color.set(value);
-                    rightWallMaterial.needsUpdate = true
-
-                } else if (key.includes('left')) {
-                    leftWallMaterial.color.set(value);
-                    leftWallRectLight.color.set(value);
-                    leftWallMaterial.needsUpdate = true
-                } else {
-                    backWallMaterial.color.set(value);
-                    backWallRectLight.color.set(value);
-                    backWallMaterial.needsUpdate = true
-                }
-            });
-    } else {
-        telelumenWallPropertiesGUI.add(telelumenWallProperties, key, 0, 100)
-            .onChange(value => {
-                if (key.includes('right')) {
-                    rightWallRectLight.intensity = value
-                } else if (key.includes('left')) {
-                    leftWallRectLight.intensity = value
-                } else {
-                    backWallRectLight.intensity = value
-                }
-            });
+                    } else if (key.includes('left')) {
+                        leftWallMaterial.color.set(value);
+                        leftWallRectLight.color.set(value);
+                        leftWallMaterial.needsUpdate = true
+                    } else {
+                        backWallMaterial.color.set(value);
+                        backWallRectLight.color.set(value);
+                        backWallMaterial.needsUpdate = true
+                    }
+                });
+        } else {
+            telelumenWallPropertiesGUI.add(telelumenWallProperties, key, 0, 100)
+                .onChange(value => {
+                    if (key.includes('right')) {
+                        rightWallRectLight.intensity = value
+                    } else if (key.includes('left')) {
+                        leftWallRectLight.intensity = value
+                    } else {
+                        backWallRectLight.intensity = value
+                    }
+                });
+        }
     }
 }
 
@@ -621,50 +633,74 @@ let shadowProperties = {
     'shadowMapWidth': 512,
     'shadowBias': 0.0001,
 }
+{// shadow GUI 
+    const shadowPropertiesGUI = gui.addFolder('Shadow Properties')
+    shadowPropertiesGUI.add(shadowProperties, 'shadowMapEnabled')
+        .onChange(value => {
+            shadowProperties.shadowMapEnabled = value;
+            pointLight.castShadow = value;
+            directionalLight.castShadow = value;
+            spotLight.castShadow = value;
+        });
+    shadowPropertiesGUI.add(shadowProperties, 'shadowCameraNear', 0, 100)
+        .onChange(value => {
+            shadowProperties.shadowCameraNear = value;
+            pointLight.shadow.camera.near = value;
+            directionalLight.shadow.camera.near = value;
+            spotLight.shadow.camera.near = value;
+        });
+    shadowPropertiesGUI.add(shadowProperties, 'shadowCameraFar', 0, 100)
+        .onChange(value => {
+            shadowProperties.shadowCameraFar = value;
+            pointLight.shadow.camera.far = value;
+            directionalLight.shadow.camera.far = value;
+            spotLight.shadow.camera.far = value;
+        });
+    shadowPropertiesGUI.add(shadowProperties, 'shadowMapHeight', 0, 1000)
+        .onChange(value => {
+            shadowProperties.shadowMapHeight = value;
+            pointLight.shadow.mapSize.height = value;
+            directionalLight.shadow.mapSize.height = value;
+            spotLight.shadow.mapSize.height = value;
+        });
+    shadowPropertiesGUI.add(shadowProperties, 'shadowMapWidth', 0, 1000)
+        .onChange(value => {
+            shadowProperties.shadowMapWidth = value;
+            pointLight.shadow.mapSize.width = value;
+            directionalLight.shadow.mapSize.width = value;
+            spotLight.shadow.mapSize.width = value;
+        });
+    shadowPropertiesGUI.add(shadowProperties, 'shadowBias', 0, 100)
+        .onChange(value => {
+            shadowProperties.shadowBias = value;
+            pointLight.shadow.bias = value;
+            directionalLight.shadow.bias = value;
+            spotLight.shadow.bias = value;
+        });
+}
 
-const shadowPropertiesGUI = gui.addFolder('Shadow Properties')
-shadowPropertiesGUI.add(shadowProperties, 'shadowMapEnabled')
-    .onChange(value => {
-        shadowProperties.shadowMapEnabled = value;
-        pointLight.castShadow = value;
-        directionalLight.castShadow = value;
-        spotLight.castShadow = value;
-    });
-shadowPropertiesGUI.add(shadowProperties, 'shadowCameraNear', 0, 100)
-    .onChange(value => {
-        shadowProperties.shadowCameraNear = value;
-        pointLight.shadow.camera.near = value;
-        directionalLight.shadow.camera.near = value;
-        spotLight.shadow.camera.near = value;
-    });
-shadowPropertiesGUI.add(shadowProperties, 'shadowCameraFar', 0, 100)
-    .onChange(value => {
-        shadowProperties.shadowCameraFar = value;
-        pointLight.shadow.camera.far = value;
-        directionalLight.shadow.camera.far = value;
-        spotLight.shadow.camera.far = value;
-    });
-shadowPropertiesGUI.add(shadowProperties, 'shadowMapHeight', 0, 1000)
-    .onChange(value => {
-        shadowProperties.shadowMapHeight = value;
-        pointLight.shadow.mapSize.height = value;
-        directionalLight.shadow.mapSize.height = value;
-        spotLight.shadow.mapSize.height = value;
-    });
-shadowPropertiesGUI.add(shadowProperties, 'shadowMapWidth', 0, 1000)
-    .onChange(value => {
-        shadowProperties.shadowMapWidth = value;
-        pointLight.shadow.mapSize.width = value;
-        directionalLight.shadow.mapSize.width = value;
-        spotLight.shadow.mapSize.width = value;
-    });
-shadowPropertiesGUI.add(shadowProperties, 'shadowBias', 0, 100)
-    .onChange(value => {
-        shadowProperties.shadowBias = value;
-        pointLight.shadow.bias = value;
-        directionalLight.shadow.bias = value;
-        spotLight.shadow.bias = value;
-    });
+let cornellBoxParams = {
+    'stageColor': 0x222222,
+    'floorColor': 0xffffff,
+    'ceilingColor': 0xffffff,
+}
+
+const materialGUI = gui.addFolder('Misc Materials');
+let cornellBoxParamsMappingMaterials = {
+    'stageColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColor }),
+    'floorColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColor }),
+    'ceilingColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColor }),
+}
+
+for (const key in cornellBoxParams) {
+    materialGUI.addColor(cornellBoxParams, key)
+        .onChange(value => {
+            cornellBoxParamsMappingMaterials[key].color.set(value);
+            // cornellBoxParams[key].needsUpdate = true;
+        });
+
+}
+
 
 
 createRoomMeshes();
@@ -802,7 +838,6 @@ function createRoomMeshes() {
 
     let telelumenWallGeometry = new THREE.BoxGeometry(0.1, telelumenWallHeight, roomSize);
 
-
     rightWallMaterial = new THREE.MeshStandardMaterial({ color: telelumenWallProperties['rightWallColor'] })
     let teleWallRight = new THREE.Mesh(telelumenWallGeometry, rightWallMaterial);
     teleWallRight.position.set(roomSize / 2, 0 - topWallHeight / 2, 0);
@@ -834,13 +869,6 @@ function createRoomMeshes() {
     backWallRectLight.position.set(0, 0 - topWallHeight / 2, -roomSize / 2);
     room.add(backWallRectLight);
 
-    // let geometry = new THREE.PlaneGeometry(roomSize, telelumenWallHeight);
-    // let material = new THREE.MeshBasicMaterial({ color: 0xffffc0, });
-    // let rectLightMesh = new THREE.Mesh(geometry, material);
-    // rectLightMesh.position.set(0, 0 - topWallHeight / 2, -roomSize / 2);
-
-    // room.add(rectLightMesh)
-
     scene.add(room)
 
 
@@ -863,38 +891,24 @@ function createRoomMeshes() {
 
 function createLights(meshToAddTo, lightPos) {
 
-    pointLight.color.set(cornellBoxParams.pointLightColor);
+    pointLight = new THREE.PointLight(pointLightParams);
     pointLight.position.set(0, lightPos, 0);
-    pointLight.power = cornellBoxParams.pointLightPower;
-    pointLight.intensity = cornellBoxParams.pointLightIntensity;
-    pointLight.distance = cornellBoxParams.pointLightDistance;
-    pointLight.decay = cornellBoxParams.pointLightDecay;
     pointLight.castShadow = true
     meshToAddTo.add(pointLight);
 
-
-    directionalLight.color.set(cornellBoxParams.directionalLightColor);
-    directionalLight.intensity = cornellBoxParams.directionalLightIntensity;
+    directionalLight = new THREE.DirectionalLight(directionalLightParams);
     directionalLight.position.set(0, lightPos, 0);
     directionalLight.target.position.set(0, 0, 0);
     directionalLight.castShadow = true
     meshToAddTo.add(directionalLight);
 
-    spotLight.color.set(cornellBoxParams.spotLightColor);
-    spotLight.intensity = cornellBoxParams.spotLightIntensity;
-    spotLight.distance = cornellBoxParams.spotLightDistance;
-    spotLight.decay = cornellBoxParams.spotLightDecay;
-    spotLight.power = cornellBoxParams.spotLightPower;
-    spotLight.angle = cornellBoxParams.spotLightAngle;
-    spotLight.penumbra = cornellBoxParams.spotLightPenumbra;
-    spotLight.castShadow = true
-
+    spotLight = new THREE.SpotLight(spotLightParams);
     spotLight.position.set(0, lightPos, 0);
-    // spotLight.target.position.set(0, 0, 0);
+    spotLight.target.position.set(0, 0, 0);
+    spotLight.castShadow = true
     meshToAddTo.add(spotLight);
 
-    ambientLight.color.set(cornellBoxParams.ambientLightColor);
-    ambientLight.intensity = cornellBoxParams.ambientLightIntensity;
+    ambientLight = new THREE.AmbientLight(ambientLightParams);
     ambientLight.position.set(0, lightPos, 0);
     meshToAddTo.add(ambientLight);
 
