@@ -2,7 +2,8 @@
 import * as THREE from 'three';
 import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm';
-
+import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 // Create a scene
 let scene = new THREE.Scene();
@@ -10,12 +11,21 @@ let scene = new THREE.Scene();
 // Create a camera
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 15;
+// THREE.RectAreaLightUniformsLib.init();
+
 
 // Create a renderer
 const canvas = document.querySelector('#c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Enable Shadows
+renderer.shadowMap.enabled = true;
+
+// Enable VR
+document.body.appendChild(VRButton.createButton(renderer));
+renderer.xr.enabled = true;
 
 // Add fly controls
 const controls = new FlyControls(camera, renderer.domElement);
@@ -32,6 +42,7 @@ let directionalLight = new THREE.DirectionalLight();
 let spotLight = new THREE.SpotLight();
 let ambientLight = new THREE.AmbientLight();
 
+// textures
 let textureLoader = new THREE.TextureLoader();
 let brickTexture = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_Color.jpg')
 let brickTextureNormals = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_NormalGL.jpg')
@@ -63,8 +74,17 @@ let rockTextureDisplacement = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_
 let rockTextureRoughness = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_Roughness.jpg')
 let rockTextureAmbientOcclusion = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_AmbientOcclusion.jpg')
 
+let reflectionTexture = textureLoader.load('cbox.jpg')
+reflectionTexture.mapping = THREE.EquirectangularReflectionMapping;
 
+let refractionTexture = textureLoader.load('cbox.jpg')
+refractionTexture.mapping = THREE.EquirectangularRefractionMapping;
 
+let envMapTextures = {
+    'none': null,
+    'reflection': reflectionTexture,
+    'refraction': refractionTexture,
+}
 let texturesColor = {
     'none': null,
     'bricks': brickTexture,
@@ -120,62 +140,66 @@ let textureMetalness = {
 }
 
 
+// materials
 let lambertMaterial = new THREE.MeshLambertMaterial();
 let phongMaterial = new THREE.MeshPhongMaterial();
 let physicalMaterial = new THREE.MeshPhysicalMaterial();
 
+let rightWallMaterial = new THREE.MeshStandardMaterial();
+let rightWallRectLight = new THREE.RectAreaLight();
+let leftWallMaterial = new THREE.MeshStandardMaterial();
+let leftWallRectLight = new THREE.RectAreaLight();
+let backWallMaterial = new THREE.MeshStandardMaterial();
+let backWallRectLight = new THREE.RectAreaLight();
+
+
 let cone, cylinder, sphere;
 
+// guis
 let cornellBoxParams = {
-    'leftWallColour': 0x00ff00,
-    'rightWallColour': 0xff0000,
-    'backWallColour': 0xffffff,
-    'stageColour': 0x222222,
-    'floorColour': 0xffffff,
-    'ceilingColour': 0xffffff,
+    'stageColor': 0x222222,
+    'floorColor': 0xffffff,
+    'ceilingColor': 0xffffff,
 
-    'pointLightIntensity': 20,
-    'pointLightColour': 0xffffff,
+    'pointLightIntensity': 5,
+    'pointLightColor': 0xffffff,
     'pointLightDistance': 0,
     'pointLightDecay': 1,
     'pointLightPower': 1,
 
     'directionalLightIntensity': 0,
-    'directionalLightColour': 0xffffff,
+    'directionalLightColor': 0xffffff,
 
     'spotLightIntensity': 0,
-    'spotLightColour': 0xffffff,
+    'spotLightColor': 0xffffff,
     'spotLightDistance': 0,
     'spotLightDecay': 1,
-    'spotLightPower': 1,
+    'spotLightPower': 0,
     'spotLightAngle': 1,
     'spotLightPenumbra': 0,
 
-    'ambientLightIntensity': 1,
-    'ambientLightColour': 0xffffff,
+    'ambientLightIntensity': 0.5,
+    'ambientLightColor': 0xffffff,
 }
 
 let cornellBoxParamsMappingMaterials = {
-    'leftWallColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.rightWallColour }),
-    'rightWallColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.leftWallColour }),
-    'backWallColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.backWallColour }),
-    'stageColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColour }),
-    'floorColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColour }),
-    'ceilingColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColour }),
+    'stageColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColor }),
+    'floorColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColor }),
+    'ceilingColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColor }),
 }
 
 let cornellBoxParamsMappingLights = {
     'pointLightIntensity': pointLight,
-    'pointLightColour': pointLight,
+    'pointLightColor': pointLight,
     'pointLightDistance': pointLight,
     'pointLightDecay': pointLight,
     'pointLightPower': pointLight,
 
     'directionalLightIntensity': directionalLight,
-    'directionalLightColour': directionalLight,
+    'directionalLightColor': directionalLight,
 
     'spotLightIntensity': spotLight,
-    'spotLightColour': spotLight,
+    'spotLightColor': spotLight,
     'spotLightDistance': spotLight,
     'spotLightDecay': spotLight,
     'spotLightPower': spotLight,
@@ -183,14 +207,14 @@ let cornellBoxParamsMappingLights = {
     'spotLightPenumbra': spotLight,
 
     'ambientLightIntensity': ambientLight,
-    'ambientLightColour': ambientLight,
+    'ambientLightColor': ambientLight,
 }
 
 const materialGUI = gui.addFolder('Materials');
 const lightingGUI = gui.addFolder('Lighting');
 for (const key in cornellBoxParams) {
     if (key.includes('Light')) {
-        if (key.includes('Colour')) {
+        if (key.includes('Color')) {
             lightingGUI.addColor(cornellBoxParams, key)
                 .onChange(value => {
                     cornellBoxParamsMappingLights[key].color.set(value);
@@ -266,7 +290,7 @@ let lambertMaterialProperties = {
     'wireframe': false,
     'vertexColors': false,
     'fog': false,
-    'envMap': texturesColor['none'],
+    'envMap': envMapTextures['none'],
     'map': texturesColor['none'],
     'alphaMap': texturesColor['none'],
     'normalMap': texturesNormals['none'],
@@ -275,7 +299,6 @@ let lambertMaterialProperties = {
     'refractionRatio': 0.98,
 }
 
-
 lambertMaterial = new THREE.MeshLambertMaterial({ ...objectMaterialProperties, ...lambertMaterialProperties });
 const lambertMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Cone Lambert Material Properties')
 for (const key in lambertMaterialProperties) {
@@ -283,8 +306,8 @@ for (const key in lambertMaterialProperties) {
 
     //special cases
     if (key == 'envMap') {
-        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(envMapTextures)).onChange(value => {
+            value = envMapTextures[value]
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
             lambertMaterial.needsUpdate = true;
@@ -343,14 +366,14 @@ for (const key in lambertMaterialProperties) {
 
 
 let phongMaterialProperties = {
-    'color': 0x309b12,
+    'color': 0x7fff5c,
     'emissive': 0x000000,
     'specular': 0x111111,
     'shininess': 30,
     'wireframe': false,
     'vertexColors': false,
     'fog': false,
-    'envMap': texturesColor['none'],
+    'envMap': envMapTextures['none'],
     'map': texturesColor['none'],
     'alphaMap': texturesColor['none'],
     'normalMap': texturesNormals['none'],
@@ -373,8 +396,8 @@ for (const key in phongMaterialProperties) {
             phongMaterial.needsUpdate = true;
         });
     } else if (key == 'envMap') {
-        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(envMapTextures)).onChange(value => {
+            value = envMapTextures[value]
             phongMaterialProperties[key] = value;
             phongMaterial[key] = value;
             phongMaterial.needsUpdate = true;
@@ -450,7 +473,7 @@ let physicalMaterialProperties = {
     'wireframe': false,
     'vertexColors': false,
     'fog': false,
-    'envMap': texturesColor['none'],
+    'envMap': envMapTextures['none'],
     'map': texturesColor['none'],
     'normalMap': texturesNormals['none'],
     'roughnessMap': texturesRoughness['none'],
@@ -467,8 +490,8 @@ for (const key in physicalMaterialProperties) {
 
     //special cases
     if (key == 'envMap') {
-        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
-            value = texturesColor[value]
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(envMapTextures)).onChange(value => {
+            value = envMapTextures[value]
             physicalMaterialProperties[key] = value;
             physicalMaterial[key] = value;
             physicalMaterial.needsUpdate = true;
@@ -547,20 +570,118 @@ for (const key in physicalMaterialProperties) {
 }
 
 
+let telelumenWallProperties = {
+    'rightWallColor': 0x00ff00,
+    'rightWallLightIntensity': 1,
+    'leftWallColor': 0xff0000,
+    'leftWallLightIntensity': 1,
+    'backWallColor': 0xffffff,
+    'backWallLightIntensity': 1,
+}
+
+const telelumenWallPropertiesGUI = gui.addFolder('Telelumen Wall Properties')
+for (const key in telelumenWallProperties) {
+    if (key.includes('Color')) {
+        telelumenWallPropertiesGUI.addColor(telelumenWallProperties, key)
+            .onChange(value => {
+                if (key.includes('right')) {
+                    rightWallMaterial.color.set(value);
+                    rightWallRectLight.color.set(value);
+                    rightWallMaterial.needsUpdate = true
+
+                } else if (key.includes('left')) {
+                    leftWallMaterial.color.set(value);
+                    leftWallRectLight.color.set(value);
+                    leftWallMaterial.needsUpdate = true
+                } else {
+                    backWallMaterial.color.set(value);
+                    backWallRectLight.color.set(value);
+                    backWallMaterial.needsUpdate = true
+                }
+            });
+    } else {
+        telelumenWallPropertiesGUI.add(telelumenWallProperties, key, 0, 100)
+            .onChange(value => {
+                if (key.includes('right')) {
+                    rightWallRectLight.intensity = value
+                } else if (key.includes('left')) {
+                    leftWallRectLight.intensity = value
+                } else {
+                    backWallRectLight.intensity = value
+                }
+            });
+    }
+}
+
+let shadowProperties = {
+    'shadowMapEnabled': true,
+    'shadowCameraNear': 0.5,
+    'shadowCameraFar': 500,
+    'shadowMapHeight': 512,
+    'shadowMapWidth': 512,
+    'shadowBias': 0.0001,
+}
+
+const shadowPropertiesGUI = gui.addFolder('Shadow Properties')
+shadowPropertiesGUI.add(shadowProperties, 'shadowMapEnabled')
+    .onChange(value => {
+        shadowProperties.shadowMapEnabled = value;
+        pointLight.castShadow = value;
+        directionalLight.castShadow = value;
+        spotLight.castShadow = value;
+    });
+shadowPropertiesGUI.add(shadowProperties, 'shadowCameraNear', 0, 100)
+    .onChange(value => {
+        shadowProperties.shadowCameraNear = value;
+        pointLight.shadow.camera.near = value;
+        directionalLight.shadow.camera.near = value;
+        spotLight.shadow.camera.near = value;
+    });
+shadowPropertiesGUI.add(shadowProperties, 'shadowCameraFar', 0, 100)
+    .onChange(value => {
+        shadowProperties.shadowCameraFar = value;
+        pointLight.shadow.camera.far = value;
+        directionalLight.shadow.camera.far = value;
+        spotLight.shadow.camera.far = value;
+    });
+shadowPropertiesGUI.add(shadowProperties, 'shadowMapHeight', 0, 1000)
+    .onChange(value => {
+        shadowProperties.shadowMapHeight = value;
+        pointLight.shadow.mapSize.height = value;
+        directionalLight.shadow.mapSize.height = value;
+        spotLight.shadow.mapSize.height = value;
+    });
+shadowPropertiesGUI.add(shadowProperties, 'shadowMapWidth', 0, 1000)
+    .onChange(value => {
+        shadowProperties.shadowMapWidth = value;
+        pointLight.shadow.mapSize.width = value;
+        directionalLight.shadow.mapSize.width = value;
+        spotLight.shadow.mapSize.width = value;
+    });
+shadowPropertiesGUI.add(shadowProperties, 'shadowBias', 0, 100)
+    .onChange(value => {
+        shadowProperties.shadowBias = value;
+        pointLight.shadow.bias = value;
+        directionalLight.shadow.bias = value;
+        spotLight.shadow.bias = value;
+    });
+
+
 createRoomMeshes();
 createObjects();
 
 // Animation loop
 function animate() {
-    requestAnimationFrame(animate);
+    // requestAnimationFrame(animate);
+    // THREE.RectAreaLightUniformsLib.update();
     controls.update(0.5);
     renderer.render(scene, camera);
 }
 
 function createRoomMeshes() {
     // Add axes helper
-    let axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
+    // let axesHelper = new THREE.AxesHelper(5);
+    // scene.add(axesHelper);
 
 
     let roomSize = 10
@@ -616,12 +737,12 @@ function createRoomMeshes() {
 
     //create roof
     let roofGeometry = new THREE.BoxGeometry(roomSize, 0.1, roomSize);
-    let roof = new THREE.Mesh(roofGeometry, cornellBoxParamsMappingMaterials['ceilingColour']);
+    let roof = new THREE.Mesh(roofGeometry, cornellBoxParamsMappingMaterials['ceilingColor']);
     roof.position.set(0, roomHeight / 2, 0);
     room.add(roof);
 
     let floorGeometry = new THREE.BoxGeometry(roomSize, 0.1, roomSize);
-    let floor = new THREE.Mesh(floorGeometry, cornellBoxParamsMappingMaterials['floorColour']);
+    let floor = new THREE.Mesh(floorGeometry, cornellBoxParamsMappingMaterials['floorColor']);
     floor.position.set(0, -roomHeight / 2, 0);
     room.add(floor);
 
@@ -671,8 +792,9 @@ function createRoomMeshes() {
     let stageHeight = 1
     let stageGeometry = new THREE.BoxGeometry(roomSize - roomSize / 5, stageHeight, roomSize - roomSize / 5);
     let stageMaterial = new THREE.MeshStandardMaterial({ color: 0x0101010 });
-    let stage = new THREE.Mesh(stageGeometry, cornellBoxParamsMappingMaterials['stageColour']);
+    let stage = new THREE.Mesh(stageGeometry, cornellBoxParamsMappingMaterials['stageColor']);
     stage.position.set(0, -roomHeight / 2 + stageHeight / 2, 0);
+    stage.receiveShadow = true
     room.add(stage);
 
     //create telelumen walls
@@ -681,25 +803,49 @@ function createRoomMeshes() {
     let telelumenWallGeometry = new THREE.BoxGeometry(0.1, telelumenWallHeight, roomSize);
 
 
-    let teleWallRight = new THREE.Mesh(telelumenWallGeometry, cornellBoxParamsMappingMaterials['rightWallColour']);
+    rightWallMaterial = new THREE.MeshStandardMaterial({ color: telelumenWallProperties['rightWallColor'] })
+    let teleWallRight = new THREE.Mesh(telelumenWallGeometry, rightWallMaterial);
     teleWallRight.position.set(roomSize / 2, 0 - topWallHeight / 2, 0);
     room.add(teleWallRight);
 
+    rightWallRectLight = new THREE.RectAreaLight(telelumenWallProperties['rightWallColor'], telelumenWallProperties['rightWallLightIntensity'], roomSize, telelumenWallHeight);
+    rightWallRectLight.rotation.y = Math.PI / 2;
+    rightWallRectLight.position.set(roomSize / 2, 0 - topWallHeight / 2, 0);
+    room.add(rightWallRectLight);
 
-    let teleWallLeft = new THREE.Mesh(telelumenWallGeometry, cornellBoxParamsMappingMaterials['leftWallColour']);
+    leftWallMaterial = new THREE.MeshStandardMaterial({ color: telelumenWallProperties['leftWallColor'] })
+    let teleWallLeft = new THREE.Mesh(telelumenWallGeometry, leftWallMaterial);
     teleWallLeft.position.set(-roomSize / 2, 0 - topWallHeight / 2, 0);
     room.add(teleWallLeft);
 
+    leftWallRectLight = new THREE.RectAreaLight(telelumenWallProperties['leftWallColor'], telelumenWallProperties['leftWallLightIntensity'], roomSize, telelumenWallHeight);
+    leftWallRectLight.rotation.y = Math.PI / -2;
+    leftWallRectLight.position.set(-roomSize / 2, 0 - topWallHeight / 2, 0);
+    room.add(leftWallRectLight);
 
-    let teleWallBack = new THREE.Mesh(telelumenWallGeometry, cornellBoxParamsMappingMaterials['backWallColour']);
+    backWallMaterial = new THREE.MeshStandardMaterial({ color: telelumenWallProperties['backWallColor'] })
+    let teleWallBack = new THREE.Mesh(telelumenWallGeometry, backWallMaterial);
     teleWallBack.rotation.y = Math.PI / 2;
     teleWallBack.position.set(0, 0 - topWallHeight / 2, -roomSize / 2);
     room.add(teleWallBack);
+
+    backWallRectLight = new THREE.RectAreaLight(telelumenWallProperties['backWallColor'], telelumenWallProperties['backWallLightIntensity'], roomSize, telelumenWallHeight);
+    backWallRectLight.rotation.y = Math.PI;
+    backWallRectLight.position.set(0, 0 - topWallHeight / 2, -roomSize / 2);
+    room.add(backWallRectLight);
+
+    // let geometry = new THREE.PlaneGeometry(roomSize, telelumenWallHeight);
+    // let material = new THREE.MeshBasicMaterial({ color: 0xffffc0, });
+    // let rectLightMesh = new THREE.Mesh(geometry, material);
+    // rectLightMesh.position.set(0, 0 - topWallHeight / 2, -roomSize / 2);
+
+    // room.add(rectLightMesh)
 
     scene.add(room)
 
 
     let table = createTable();
+    table.castShadow = true;
     room.add(table)
 
 
@@ -708,39 +854,46 @@ function createRoomMeshes() {
     createLights(room, lightPos)
 
     room.position.y = 1
+
+    // enable shadows
+    // room.receiveShadow = true;
+    // room.castShadow = true;
     return cage, room
 }
 
 function createLights(meshToAddTo, lightPos) {
 
-    pointLight.color.set(cornellBoxParams.pointLightColour);
+    pointLight.color.set(cornellBoxParams.pointLightColor);
     pointLight.position.set(0, lightPos, 0);
     pointLight.power = cornellBoxParams.pointLightPower;
     pointLight.intensity = cornellBoxParams.pointLightIntensity;
     pointLight.distance = cornellBoxParams.pointLightDistance;
     pointLight.decay = cornellBoxParams.pointLightDecay;
+    pointLight.castShadow = true
     meshToAddTo.add(pointLight);
 
 
-    directionalLight.color.set(cornellBoxParams.directionalLightColour);
+    directionalLight.color.set(cornellBoxParams.directionalLightColor);
     directionalLight.intensity = cornellBoxParams.directionalLightIntensity;
     directionalLight.position.set(0, lightPos, 0);
     directionalLight.target.position.set(0, 0, 0);
+    directionalLight.castShadow = true
     meshToAddTo.add(directionalLight);
 
-    spotLight.color.set(cornellBoxParams.spotLightColour);
+    spotLight.color.set(cornellBoxParams.spotLightColor);
     spotLight.intensity = cornellBoxParams.spotLightIntensity;
     spotLight.distance = cornellBoxParams.spotLightDistance;
     spotLight.decay = cornellBoxParams.spotLightDecay;
     spotLight.power = cornellBoxParams.spotLightPower;
     spotLight.angle = cornellBoxParams.spotLightAngle;
     spotLight.penumbra = cornellBoxParams.spotLightPenumbra;
+    spotLight.castShadow = true
 
     spotLight.position.set(0, lightPos, 0);
     // spotLight.target.position.set(0, 0, 0);
     meshToAddTo.add(spotLight);
 
-    ambientLight.color.set(cornellBoxParams.ambientLightColour);
+    ambientLight.color.set(cornellBoxParams.ambientLightColor);
     ambientLight.intensity = cornellBoxParams.ambientLightIntensity;
     ambientLight.position.set(0, lightPos, 0);
     meshToAddTo.add(ambientLight);
@@ -748,15 +901,16 @@ function createLights(meshToAddTo, lightPos) {
     return pointLight, directionalLight, spotLight, ambientLight
 }
 
-
 function createTable() {
 
     let tableSize = 5
     let tableHeight = 3.3
     let tablePosY = -2
     let tableTopGeo = new THREE.BoxGeometry(tableSize, 0.1, tableSize);
-    let tableTopMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+    let tableTopMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
     let tableTop = new THREE.Mesh(tableTopGeo, tableTopMaterial);
+    tableTop.receiveShadow = true;
+    tableTop.castShadow = true;
     tableTop.position.set(0, tablePosY, 0);
 
     let tableMesh = new THREE.Object3D();
@@ -788,6 +942,9 @@ function createTable() {
     tablePillar2.position.set(-tableSize / 2 + tableSize / 10, tablePosY - tableHeight / 2, 0);
     tableMesh.add(tablePillar2);
 
+    tableMesh.receiveShadow = true;
+    // tableMesh.castShadow = true;
+
     scene.add(tableMesh)
     return tableMesh;
 }
@@ -795,7 +952,7 @@ function createTable() {
 
 function createObjects() {
     let coneGeo = new THREE.ConeGeometry(1, 2, 20);
-    // let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColour']);
+    // let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColor']);
     cone = new THREE.Mesh(coneGeo, lambertMaterial);
     cone.position.set(-1.5, 0, -1);
     scene.add(cone);
@@ -809,8 +966,22 @@ function createObjects() {
     sphere = new THREE.Mesh(sphereGeo, physicalMaterial);
     sphere.position.set(0, 0, 1);
     scene.add(sphere);
+
+    cone.receiveShadow = true;
+    cone.castShadow = true;
+    cylinder.receiveShadow = true;
+    cylinder.castShadow = true;
+    sphere.receiveShadow = true;
+    sphere.castShadow = true;
 }
+
+// let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
+// let sphere2 = new THREE.Mesh(sphereGeo, new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
+// sphere2.castShadow = true;
+// sphere2.position.set(0, 2, 0);
+// scene.add(sphere2);
 
 
 // Start the animation loop
-animate();
+renderer.setAnimationLoop(animate);
+// animate();
