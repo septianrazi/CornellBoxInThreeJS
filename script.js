@@ -99,6 +99,12 @@ let rockTextureDisplacement = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_
 let rockTextureRoughness = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_Roughness.jpg')
 let rockTextureAmbientOcclusion = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_AmbientOcclusion.jpg')
 
+let pebblesTexture = textureLoader.load('Pebbles_001/Pebles_001_COLOR.png')
+let pebblesTextureNormals = textureLoader.load('Pebbles_001/Pebles_001_NRM.png')
+let pebblesTextureDisplacement = textureLoader.load('Pebbles_001/Pebles_001_DISP.png')
+let pebblesTextureAmbientOcclusion = textureLoader.load('Pebbles_001/Pebles_001_OCC.png')
+let pebblesTextureSpecular = textureLoader.load('Pebbles_001/Pebles_001_SPEC.png')
+
 let reflectionTexture = textureLoader.load('cbox.jpg')
 reflectionTexture.mapping = THREE.EquirectangularReflectionMapping;
 
@@ -117,6 +123,7 @@ let texturesColor = {
     'fabric': fabricTexture,
     'net': netTexture,
     'rock': rockTexture,
+    'pebbles': pebblesTexture,
 }
 
 let texturesNormals = {
@@ -126,6 +133,7 @@ let texturesNormals = {
     'fabric': fabricTextureNormals,
     'net': netTextureNormals,
     'rock': rockTextureNormals,
+    'pebbles': pebblesTextureNormals,
 }
 
 let texturesDisplacement = {
@@ -135,6 +143,7 @@ let texturesDisplacement = {
     'fabric': fabricTextureDisplacement,
     'net': netTextureDisplacement,
     'rock': rockTextureDisplacement,
+    'pebbles': pebblesTextureDisplacement,
 }
 
 let texturesRoughness = {
@@ -144,6 +153,7 @@ let texturesRoughness = {
     'fabric': fabricTextureRoughness,
     'net': netTextureRoughness,
     'rock': rockTextureRoughness,
+
 }
 
 let texturesAmbientOcclusion = {
@@ -152,6 +162,7 @@ let texturesAmbientOcclusion = {
     'metal': metalTextureAmbientOcclusion,
     'net': netTextureOpacity,
     'rock': rockTextureAmbientOcclusion,
+    'pebbles': pebblesTextureAmbientOcclusion,
 }
 
 let texturesOpacity = {
@@ -162,6 +173,11 @@ let texturesOpacity = {
 let textureMetalness = {
     'none': null,
     'metal': metalTextureMetalness,
+}
+
+let textureSpecular = {
+    'none': null,
+    'pebbles': pebblesTextureSpecular,
 }
 
 
@@ -336,6 +352,7 @@ let lambertMaterialProperties = {
     'map': texturesColor['none'],
     'alphaMap': texturesColor['none'],
     'normalMap': texturesNormals['none'],
+    'specularMap': textureSpecular['none'],
     'combine': THREE.MultiplyOperation,
     'reflectivity': 1,
     'refractionRatio': 0.98,
@@ -363,6 +380,13 @@ for (const key in lambertMaterialProperties) {
     } else if (key == 'normalMap') {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesNormals)).onChange(value => {
             value = texturesNormals[value]
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            lambertMaterial.needsUpdate = true;
+        });
+    } else if (key == 'specularMap') {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(textureSpecular)).onChange(value => {
+            value = textureSpecular[value]
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
             lambertMaterial.needsUpdate = true;
@@ -418,7 +442,7 @@ let phongMaterialProperties = {
     'map': texturesColor['none'],
     'alphaMap': texturesColor['none'],
     'normalMap': texturesNormals['none'],
-
+    'specularMap': textureSpecular['none'],
     'combine': THREE.MultiplyOperation,
     'reflectivity': 1,
     'refractionRatio': 0.98,
@@ -452,6 +476,13 @@ for (const key in phongMaterialProperties) {
     } else if (key == 'normalMap') {
         phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesNormals)).onChange(value => {
             value = texturesNormals[value]
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (key == 'specularMap') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(textureSpecular)).onChange(value => {
+            value = textureSpecular[value]
             phongMaterialProperties[key] = value;
             phongMaterial[key] = value;
             phongMaterial.needsUpdate = true;
@@ -519,6 +550,7 @@ let physicalMaterialProperties = {
     'roughnessMap': texturesRoughness['none'],
     'metalnessMap': texturesColor['none'],
     'displacementMap': texturesDisplacement['none'],
+    'specularIntensityMap': textureSpecular['none'],
     // 'irisdesenceMap': texturesColor['none'],
     'alphaMap': texturesOpacity['none'],
 }
@@ -552,6 +584,13 @@ for (const key in physicalMaterialProperties) {
     } else if (key == 'alphaMap') {
         physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesOpacity)).onChange(value => {
             value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'specularIntensityMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(textureSpecular)).onChange(value => {
+            value = textureSpecular[value]
             physicalMaterialProperties[key] = value;
             physicalMaterial[key] = value;
             physicalMaterial.needsUpdate = true;
