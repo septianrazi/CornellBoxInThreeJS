@@ -1,5 +1,7 @@
 # Cornell Box in THREE.JS
 
+[index.html](index.html) contains all the code for each task in PW2. 
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Description
