@@ -202,6 +202,7 @@ let globalMesh;
 
 // guis
 const lightingGUI = gui.addFolder('Lighting');
+lightingGUI.close();
 let pointLightParams = {
     'intensity': 5,
     'color': 0xffffff,
@@ -308,6 +309,7 @@ let objectMaterialProperties = {
     'side': THREE.FrontSide,
 }
 const materialPropertiesGUI = gui.addFolder('Object Material Properties')
+materialPropertiesGUI.close();
 for (const key in objectMaterialProperties) {
     let paramValue = objectMaterialProperties[key];
     if ((key.includes('side'))) {
@@ -658,6 +660,7 @@ let telelumenWallProperties = {
 {
     // telelumen wall GUI
     const telelumenWallPropertiesGUI = gui.addFolder('Telelumen Wall Properties')
+    telelumenWallPropertiesGUI.close();
     for (const key in telelumenWallProperties) {
         if (key.includes('Color')) {
             telelumenWallPropertiesGUI.addColor(telelumenWallProperties, key)
@@ -703,6 +706,7 @@ let shadowProperties = {
 }
 {// shadow GUI 
     const shadowPropertiesGUI = gui.addFolder('Shadow Properties')
+    shadowPropertiesGUI.close();
     shadowPropertiesGUI.add(shadowProperties, 'shadowMapEnabled')
         .onChange(value => {
             shadowProperties.shadowMapEnabled = value;
@@ -753,6 +757,7 @@ let cornellBoxParams = {
     'ceilingColor': 0xffffff,
 }
 const materialGUI = gui.addFolder('Misc Materials');
+materialGUI.close();
 let cornellBoxParamsMappingMaterials = {
     'stageColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColor }),
     'floorColor': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColor }),
@@ -780,17 +785,8 @@ mesh.rotation.y = Math.PI / 4;
 mesh.scale.setScalar(2);
 group.add(mesh);
 
-
 createRoomMeshes();
 createObjects();
-
-// Animation loop
-function animate() {
-    // requestAnimationFrame(animate);
-    // THREE.RectAreaLightUniformsLib.update();
-    controls.update(0.5);
-    renderer.render(scene, camera);
-}
 
 function createRoomMeshes() {
     // Add axes helper
@@ -1041,7 +1037,6 @@ function createTable() {
     return tableMesh;
 }
 
-
 function createObjects() {
     let objectYPos = -1
     objectMeshes = new THREE.Object3D();
@@ -1077,16 +1072,14 @@ function createObjects() {
 
 room.scale.set(0.5, 0.5, 0.5);
 room.position.z = -5;
-globalMesh = new THREE.Object3D();
-// globalMesh.add(room);
-// globalMesh.add(objectMeshes);
 
-// let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
-// let sphere2 = new THREE.Mesh(sphereGeo, new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
-// sphere2.castShadow = true;
-// sphere2.position.set(0, 2, 0);
-// scene.add(sphere2);
-
+// Animation loop
+function animate() {
+    // requestAnimationFrame(animate);
+    // THREE.RectAreaLightUniformsLib.update();
+    controls.update(0.5);
+    renderer.render(scene, camera);
+}
 
 // Start the animation loop
 renderer.setAnimationLoop(animate);
