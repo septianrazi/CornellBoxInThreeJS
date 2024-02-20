@@ -39,22 +39,39 @@ let brickTextureDisplacement = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K
 let brickTextureRoughness = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_Roughness.jpg')
 let brickTextureAmbientOcclusion = textureLoader.load('Bricks084_1K-JPG/Bricks084_1K-JPG_AmbientOcclusion.jpg')
 
-let metalTexture = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Color.jpg')
-let metalTextureNormals = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_NormalGL.jpg')
-let metalTextureDisplacement = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Displacement.jpg')
-let metalTextureRoughness = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_Roughness.jpg')
-let metalTextureAmbientOcclusion = textureLoader.load('DiamondPlate008C_1K-JPG/DiamondPlate008C_1K-JPG_AmbientOcclusion.jpg')
+let metalTexture = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_Color.jpg')
+let metalTextureNormals = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_NormalGL.jpg')
+let metalTextureDisplacement = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_Displacement.jpg')
+let metalTextureRoughness = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_Roughness.jpg')
+let metalTextureAmbientOcclusion = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_AmbientOcclusion.jpg')
+let metalTextureMetalness = textureLoader.load('DiamondPlate008C_4K-JPG/DiamondPlate008C_4K-JPG_Metalness.jpg')
 
 let fabricTexture = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Color.jpg')
 let fabricTextureNormals = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_NormalGL.jpg')
 let fabricTextureDisplacement = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Displacement.jpg')
 let fabricTextureRoughness = textureLoader.load('Fabric077_1K-JPG/Fabric077_1K-JPG_Roughness.jpg')
 
+let netTexture = textureLoader.load('Net002A_4K-JPG/Net002A_4K-JPG_Color.jpg')
+let netTextureNormals = textureLoader.load('Net002A_4K-JPG/Net002A_4K-JPG_NormalGL.jpg')
+let netTextureDisplacement = textureLoader.load('Net002A_4K-JPG/Net002A_4K-JPG_Displacement.jpg')
+let netTextureRoughness = textureLoader.load('Net002A_4K-JPG/Net002A_4K-JPG_Roughness.jpg')
+let netTextureOpacity = textureLoader.load('Net002A_4K-JPG/Net002A_4K-JPG_Opacity.jpg')
+
+let rockTexture = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_Color.jpg')
+let rockTextureNormals = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_NormalGL.jpg')
+let rockTextureDisplacement = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_Displacement.jpg')
+let rockTextureRoughness = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_Roughness.jpg')
+let rockTextureAmbientOcclusion = textureLoader.load('Rock030_4K-JPG/Rock030_4K-JPG_AmbientOcclusion.jpg')
+
+
+
 let texturesColor = {
     'none': null,
     'bricks': brickTexture,
     'metal': metalTexture,
     'fabric': fabricTexture,
+    'net': netTexture,
+    'rock': rockTexture,
 }
 
 let texturesNormals = {
@@ -62,6 +79,8 @@ let texturesNormals = {
     'bricks': brickTextureNormals,
     'metal': metalTextureNormals,
     'fabric': fabricTextureNormals,
+    'net': netTextureNormals,
+    'rock': rockTextureNormals,
 }
 
 let texturesDisplacement = {
@@ -69,6 +88,8 @@ let texturesDisplacement = {
     'bricks': brickTextureDisplacement,
     'metal': metalTextureDisplacement,
     'fabric': fabricTextureDisplacement,
+    'net': netTextureDisplacement,
+    'rock': rockTextureDisplacement,
 }
 
 let texturesRoughness = {
@@ -76,13 +97,28 @@ let texturesRoughness = {
     'bricks': brickTextureRoughness,
     'metal': metalTextureRoughness,
     'fabric': fabricTextureRoughness,
+    'net': netTextureRoughness,
+    'rock': rockTextureRoughness,
 }
 
 let texturesAmbientOcclusion = {
     'none': null,
     'bricks': brickTextureAmbientOcclusion,
     'metal': metalTextureAmbientOcclusion,
+    'net': netTextureOpacity,
+    'rock': rockTextureAmbientOcclusion,
 }
+
+let texturesOpacity = {
+    'none': null,
+    'net': netTextureOpacity,
+}
+
+let textureMetalness = {
+    'none': null,
+    'metal': metalTextureMetalness,
+}
+
 
 let lambertMaterial = new THREE.MeshLambertMaterial();
 let phongMaterial = new THREE.MeshPhongMaterial();
@@ -97,10 +133,6 @@ let cornellBoxParams = {
     'stageColour': 0x222222,
     'floorColour': 0xffffff,
     'ceilingColour': 0xffffff,
-
-    'coneColour': 0xffff00,
-    'cylinderColour': 0x00ff00,
-    'sphereColour': 0x0000ff,
 
     'pointLightIntensity': 20,
     'pointLightColour': 0xffffff,
@@ -130,9 +162,6 @@ let cornellBoxParamsMappingMaterials = {
     'stageColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.stageColour }),
     'floorColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.floorColour }),
     'ceilingColour': new THREE.MeshStandardMaterial({ color: cornellBoxParams.ceilingColour }),
-    'coneColour': new THREE.MeshLambertMaterial({ color: cornellBoxParams.coneColour }),
-    'cylinderColour': new THREE.MeshPhongMaterial({ color: cornellBoxParams.cylinderColour }),
-    'sphereColour': new THREE.MeshPhysicalMaterial({ 'color': cornellBoxParams.sphereColour }),
 }
 
 let cornellBoxParamsMappingLights = {
@@ -180,11 +209,10 @@ for (const key in cornellBoxParams) {
                 // cornellBoxParams[key].needsUpdate = true;
             });
     }
-
 }
 
 
-let colorTypeParameters = ['blendColor', 'color', 'emissive']
+let colorTypeParameters = ['blendColor', 'color', 'emissive', 'specular', 'sheenColor']
 let objectMaterialProperties = {
     'transparent': false,
     'opacity': 1.0,
@@ -197,7 +225,7 @@ let objectMaterialProperties = {
     'side': THREE.FrontSide,
 }
 
-const materialPropertiesGUI = gui.addFolder('Material Properties')
+const materialPropertiesGUI = gui.addFolder('Object Material Properties')
 for (const key in objectMaterialProperties) {
     let paramValue = objectMaterialProperties[key];
     if ((key.includes('side'))) {
@@ -233,55 +261,61 @@ for (const key in objectMaterialProperties) {
 }
 
 let lambertMaterialProperties = {
-    'color': 0xffffff,
+    'color': 0xaaaa00,
     'emissive': 0x000000,
     'wireframe': false,
     'vertexColors': false,
     'fog': false,
-    'envMaps': texturesColor[0],
-    'map': texturesColor[0],
-    'alphaMap': texturesColor[0],
+    'envMap': texturesColor['none'],
+    'map': texturesColor['none'],
+    'alphaMap': texturesColor['none'],
+    'normalMap': texturesNormals['none'],
     'combine': THREE.MultiplyOperation,
     'reflectivity': 1,
     'refractionRatio': 0.98,
 }
 
-// console.log(texturesColor[0])
-console.log({ ...objectMaterialProperties, ...lambertMaterialProperties })
-lambertMaterial = new THREE.MeshLambertMaterial(lambertMaterialProperties);
 
-const lambertMaterialPropertiesGUI = gui.addFolder('Lambert Material Properties')
+lambertMaterial = new THREE.MeshLambertMaterial({ ...objectMaterialProperties, ...lambertMaterialProperties });
+const lambertMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Cone Lambert Material Properties')
 for (const key in lambertMaterialProperties) {
     let paramValue = lambertMaterialProperties[key];
 
     //special cases
-    if (key == 'envMaps') {
+    if (key == 'envMap') {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
             value = texturesColor[value]
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
         });
     } else if (key == 'map') {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
             value = texturesColor[value]
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
+        });
+    } else if (key == 'normalMap') {
+        lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesNormals)).onChange(value => {
+            value = texturesNormals[value]
+            lambertMaterialProperties[key] = value;
+            lambertMaterial[key] = value;
+            lambertMaterial.needsUpdate = true;
         });
     } else if (key == 'alphaMap') {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
             value = texturesColor[value]
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
         });
     } else if ((key.includes('combine'))) {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, { MultiplyOperation: THREE.MultiplyOperation, MixOperation: THREE.MixOperation, AddOperation: THREE.AddOperation })
             .onChange(value => {
                 lambertMaterialProperties[key] = value;
                 lambertMaterial[key] = value;
-                cone.needsUpdate = true;
+                lambertMaterial.needsUpdate = true;
             });
 
         // generic cases
@@ -289,31 +323,227 @@ for (const key in lambertMaterialProperties) {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
 
         });
     } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
         lambertMaterialPropertiesGUI.addColor(lambertMaterialProperties, key).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key].set(value);
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
         });
     } else if (typeof paramValue === 'number') {
         lambertMaterialPropertiesGUI.add(lambertMaterialProperties, key, 0, 1).onChange(value => {
             lambertMaterialProperties[key] = value;
             lambertMaterial[key] = value;
-            cone.needsUpdate = true;
+            lambertMaterial.needsUpdate = true;
         });
     }
 }
 
 
 let phongMaterialProperties = {
+    'color': 0x309b12,
+    'emissive': 0x000000,
+    'specular': 0x111111,
+    'shininess': 30,
+    'wireframe': false,
+    'vertexColors': false,
+    'fog': false,
+    'envMap': texturesColor['none'],
+    'map': texturesColor['none'],
+    'alphaMap': texturesColor['none'],
+    'normalMap': texturesNormals['none'],
 
+    'combine': THREE.MultiplyOperation,
+    'reflectivity': 1,
+    'refractionRatio': 0.98,
+}
+
+phongMaterial = new THREE.MeshPhongMaterial({ ...objectMaterialProperties, ...phongMaterialProperties });
+const phongMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Cylinder Phong Material Properties')
+for (const key in phongMaterialProperties) {
+    let paramValue = phongMaterialProperties[key];
+
+    //special cases
+    if (key == 'shininess') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, 0, 100).onChange(value => {
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (key == 'envMap') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (key == 'map') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (key == 'normalMap') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesNormals)).onChange(value => {
+            value = texturesNormals[value]
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (key == 'alphaMap') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    } else if ((key.includes('combine'))) {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, { MultiplyOperation: THREE.MultiplyOperation, MixOperation: THREE.MixOperation, AddOperation: THREE.AddOperation })
+            .onChange(value => {
+                phongMaterialProperties[key] = value;
+                phongMaterial[key] = value;
+                phongMaterial.needsUpdate = true;
+            });
+
+        // generic cases
+    } else if (typeof paramValue === 'boolean') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key).onChange(value => {
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+
+        });
+    } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
+        phongMaterialPropertiesGUI.addColor(phongMaterialProperties, key).onChange(value => {
+            phongMaterialProperties[key] = value;
+            phongMaterial[key].set(value);
+            phongMaterial.needsUpdate = true;
+        });
+    } else if (typeof paramValue === 'number') {
+        phongMaterialPropertiesGUI.add(phongMaterialProperties, key, 0, 1).onChange(value => {
+            phongMaterialProperties[key] = value;
+            phongMaterial[key] = value;
+            phongMaterial.needsUpdate = true;
+        });
+    }
 }
 
 let physicalMaterialProperties = {
+    'color': 0x3f82d9,
+    'emissive': 0x000000,
+    'roughness': 0.5,
+    'metalness': 0.5,
+    'ior': 1.5,
+    'reflectivity': 1,
+    'iridescence': 0.5,
+    'iridescenceIOR': 1.5,
+    'sheen': 0.5,
+    'sheenRoughness': 0.5,
+    'sheenColor': 0xffffff,
+    'clearcoat': 0.5,
+    'clearcoatRoughness': 0.5,
+    'specularIntensity': 0.5,
+    'flatShading': false,
+    'wireframe': false,
+    'vertexColors': false,
+    'fog': false,
+    'envMap': texturesColor['none'],
+    'map': texturesColor['none'],
+    'normalMap': texturesNormals['none'],
+    'roughnessMap': texturesRoughness['none'],
+    'metalnessMap': texturesColor['none'],
+    'displacementMap': texturesDisplacement['none'],
+    // 'irisdesenceMap': texturesColor['none'],
+    'alphaMap': texturesOpacity['none'],
+}
 
+physicalMaterial = new THREE.MeshPhysicalMaterial({ ...objectMaterialProperties, ...physicalMaterialProperties });
+const physicalMaterialPropertiesGUI = materialPropertiesGUI.addFolder('Sphere Physical Material Properties')
+for (const key in physicalMaterialProperties) {
+    let paramValue = physicalMaterialProperties[key];
+
+    //special cases
+    if (key == 'envMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'map') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'normalMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesNormals)).onChange(value => {
+            value = texturesNormals[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'alphaMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesOpacity)).onChange(value => {
+            value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'roughnessMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesRoughness)).onChange(value => {
+            value = texturesRoughness[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'metalnessMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(textureMetalness)).onChange(value => {
+            value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'displacementMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesDisplacement)).onChange(value => {
+            value = texturesDisplacement[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (key == 'irisdesenceMap') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, Object.keys(texturesColor)).onChange(value => {
+            value = texturesColor[value]
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+
+        // generic cases
+    } else if (typeof paramValue === 'boolean') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key).onChange(value => {
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+
+        });
+    } else if (typeof paramValue === 'number' && colorTypeParameters.includes(key)) {
+        physicalMaterialPropertiesGUI.addColor(physicalMaterialProperties, key).onChange(value => {
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key].set(value);
+            physicalMaterial.needsUpdate = true;
+        });
+    } else if (typeof paramValue === 'number') {
+        physicalMaterialPropertiesGUI.add(physicalMaterialProperties, key, 0, 1).onChange(value => {
+            physicalMaterialProperties[key] = value;
+            physicalMaterial[key] = value;
+            physicalMaterial.needsUpdate = true;
+        });
+    }
 }
 
 
@@ -512,8 +742,6 @@ function createLights(meshToAddTo, lightPos) {
 
     ambientLight.color.set(cornellBoxParams.ambientLightColour);
     ambientLight.intensity = cornellBoxParams.ambientLightIntensity;
-    console.log(cornellBoxParams.ambientLightIntensity)
-    console.log(ambientLight.intensity)
     ambientLight.position.set(0, lightPos, 0);
     meshToAddTo.add(ambientLight);
 
@@ -569,17 +797,17 @@ function createObjects() {
     let coneGeo = new THREE.ConeGeometry(1, 2, 20);
     // let cone = new THREE.Mesh(coneGeo, cornellBoxParamsMappingMaterials['coneColour']);
     cone = new THREE.Mesh(coneGeo, lambertMaterial);
-    cone.position.set(-1, 0, -1);
+    cone.position.set(-1.5, 0, -1);
     scene.add(cone);
 
     let cylinderGeo = new THREE.CylinderGeometry(1, 1, 2, 20);
     cylinder = new THREE.Mesh(cylinderGeo, phongMaterial);
-    cylinder.position.set(1, 0, -1);
+    cylinder.position.set(1.5, 0, -1);
     scene.add(cylinder);
 
     let sphereGeo = new THREE.SphereGeometry(1, 20, 20);
     sphere = new THREE.Mesh(sphereGeo, physicalMaterial);
-    sphere.position.set(0, 0, 2);
+    sphere.position.set(0, 0, 1);
     scene.add(sphere);
 }
 
